@@ -25,5 +25,8 @@ jobs:
     steps:
       # Runs a single command using the runners shell
       - name: Output Inputs
-        run: echo "\\\`\\\`\\\`json\n${INPUTS}\n\\\`\\\`\\\`" | jq > $GITHUB_STEP_SUMMARY
+        run: |
+          echo "\\\`\\\`\\\`json\n" > $GITHUB_STEP_SUMMARY
+          echo "${INPUTS}" | jq >> $GITHUB_STEP_SUMMARY
+          echo "\n\\\`\\\`\\\`" >> $GITHUB_STEP_SUMMARY
   
