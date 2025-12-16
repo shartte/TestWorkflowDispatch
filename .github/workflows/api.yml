@@ -1,0 +1,29 @@
+name: API Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Runs a single command using the runners shell
+    - name: Get OIDC token
+      id: oidc
+      uses: actions/github-script@v7
+      with:
+        script: core.setOutput('token', await core.getIDToken('neoforge-meta-api'))
+    - name: Query API
+      run: |
+        curl -H "Authorization: Bearer ${META_API_TOKEN}" https://meta-api.prod.k8s.neoforged.net/v1/neoforged-versions/ -v -o response
+        cat response | jq
+      env:
+        META_API_TOKEN: "${{ steps.oidc.outputs.token }}"
