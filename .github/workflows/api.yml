@@ -21,6 +21,14 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: core.setOutput('token', await core.getIDToken('neoforge-meta-api'))
+    - name: Print OIDC token claims
+      run: |
+        echo "### OIDC Token Claims" >> $GITHUB_STEP_SUMMARY
+        echo '```json' >> $GITHUB_STEP_SUMMARY
+        echo "${META_API_TOKEN}" | cut -d '.' -f 2 | base64 -d | jq >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+      env:
+        META_API_TOKEN: "${{ steps.oidc.outputs.token }}"
     - name: Query API
       run: |
         curl -H "Authorization: Bearer ${META_API_TOKEN}" https://meta-api.prod.k8s.neoforged.net/v1/neoforged-versions/ -v -o response
