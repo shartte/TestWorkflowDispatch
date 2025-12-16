@@ -25,7 +25,15 @@ jobs:
       run: |
         echo "### OIDC Token Claims" >> $GITHUB_STEP_SUMMARY
         echo '```json' >> $GITHUB_STEP_SUMMARY
-        echo "${META_API_TOKEN}" | cut -d '.' -f 2 | base64 -d | jq >> $GITHUB_STEP_SUMMARY
+        PAYLOAD=$(echo "${META_API_TOKEN}" | cut -d '.' -f 2)
+        # Convert base64url to base64 and add padding
+        PAYLOAD=$(echo "$PAYLOAD" | tr '_-' '/+')
+        # Add padding if needed
+        case $((${#PAYLOAD} % 4)) in
+          2) PAYLOAD="${PAYLOAD}==" ;;
+          3) PAYLOAD="${PAYLOAD}=" ;;
+        esac
+        echo "$PAYLOAD" | base64 -d | jq >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
       env:
         META_API_TOKEN: "${{ steps.oidc.outputs.token }}"
